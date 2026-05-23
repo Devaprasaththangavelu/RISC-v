@@ -1,22 +1,22 @@
 `timescale 1ns/1ps
-module pc(
+module program_counter(
 
 input clk,
 input rst,
 
 input  [31:0] pc_next,
 
-output reg [31:0] program_counter
+output reg [31:0] pc
 
 );
 
 always @(posedge clk) begin
 
     if(rst)
-        program_counter <= 32'b0;
+        pc <= 32'b0;
 
     else
-        program_counter <= pc_next;
+        pc <= pc_next;
 
 end
 
