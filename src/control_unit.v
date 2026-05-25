@@ -1,74 +1,82 @@
 `timescale 1ns/1ps
-module control_unit(
 
-input  [6:0] opcode,
-input  [2:0] funct3,
-input  [6:0] funct7,
+module control_unit (
+    input  [6:0] opcode,
 
-output reg [3:0] alu_sel,
-output reg       reg_write
-
+    output reg       reg_write,
+    output reg       mem_read,
+    output reg       mem_write,
+    output reg       alu_src,
+    output reg       wb_sel,
+    output reg       branch,
+    output reg [1:0] ALUOp
 );
 
 always @(*) begin
 
-    // default values
-    alu_sel   = 4'b0000;
-    reg_write = 1'b0;
+    // default values (VERY IMPORTANT for safe design)
+    reg_write = 0;
+    mem_read  = 0;
+    mem_write = 0;
+    alu_src   = 0;
+    wb_sel    = 0;
+    branch    = 0;
+    ALUOp     = 2'b00;
 
-    case(opcode)
+    case (opcode)
 
-        // R-Type Instructions
+        // =========================
+        // R-TYPE (0110011)
+        // =========================
         7'b0110011: begin
+            reg_write = 1;
+            alu_src   = 0;
+            wb_sel    = 0;
+            ALUOp     = 2'b10;
+        end
 
-            reg_write = 1'b1;
+        // =========================
+        // I-TYPE ALU (0010011)
+        // ADDI, ANDI, ORI, etc.
+        // =========================
+        7'b0010011: begin
+            reg_write = 1;
+            alu_src   = 1;
+            wb_sel    = 0;
+            ALUOp     = 2'b11;
+        end
 
-            case({funct7,funct3})
+        // =========================
+        // LOAD (LW) (0000011)
+        // =========================
+        7'b0000011: begin
+            reg_write = 1;
+            mem_read  = 1;
+            alu_src   = 1;
+            wb_sel    = 1;
+            ALUOp     = 2'b00;
+        end
 
-                // ADD
-                10'b0000000_000:
-                    alu_sel = 4'b0000;
+        // =========================
+        // STORE (SW) (0100011)
+        // =========================
+        7'b0100011: begin
+            mem_write = 1;
+            alu_src   = 1;
+            ALUOp     = 2'b00;
+        end
 
-                // SUB
-                10'b0100000_000:
-                    alu_sel = 4'b0001;
-
-                // AND
-                10'b0000000_111:
-                    alu_sel = 4'b0010;
-
-                // OR
-                10'b0000000_110:
-                    alu_sel = 4'b0011;
-
-                // XOR
-                10'b0000000_100:
-                    alu_sel = 4'b0100;
-
-                // SLT
-                10'b0000000_010:
-                    alu_sel = 4'b0111;
-
-                // SLL
-                10'b0000000_001:
-                    alu_sel = 4'b1000;
-
-                // SRL
-                10'b0000000_101:
-                    alu_sel = 4'b1001;
-
-                default:
-                    alu_sel = 4'b0000;
-
-            endcase
-
+        // =========================
+        // BRANCH (BEQ) (1100011)
+        // =========================
+        7'b1100011: begin
+            branch = 1;
+            alu_src = 0;
+            ALUOp   = 2'b01;
         end
 
         default: begin
-
-            alu_sel   = 4'b0000;
-            reg_write = 1'b0;
-
+            // safe defaults already applied
         end
 
     endcase
