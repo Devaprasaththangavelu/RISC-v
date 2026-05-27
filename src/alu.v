@@ -4,11 +4,12 @@ module alu(
 input  [31:0] a,
 input  [31:0] b,
 input  [3:0] sel,
+output reg zero,
 output reg [31:0] c
 );
 
 always @(*) begin
-
+   zero=0;
     case(sel)
 
     4'b0000: c = a + b;
@@ -26,7 +27,11 @@ always @(*) begin
     default: c = 32'h00000000;
 
     endcase
-
+    
+    if(c==0)begin
+    zero =1;
+    end
+    
 end
 
 endmodule

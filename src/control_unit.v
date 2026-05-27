@@ -2,7 +2,6 @@
 
 module control_unit (
     input  [6:0] opcode,
-
     output reg       reg_write,
     output reg       mem_read,
     output reg       mem_write,
