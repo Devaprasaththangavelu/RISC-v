@@ -16,14 +16,16 @@ module id_ex_reg(
     input         mem_write_in,
     input         alu_src_in,
     input         wb_sel_in,
-
+    input  [4:0] rs1_in,
+    input  [4:0] rs2_in,
     input  [3:0]  alu_sel_in,
 
     output reg [31:0] pc_out,
     output reg [31:0] rs1_data_out,
     output reg [31:0] rs2_data_out,
     output reg [31:0] imm_out,
-
+    output reg [4:0] rs1_out,
+    output reg [4:0] rs2_out,
     output reg [4:0]  rd_out,
 
     output reg        reg_write_out,
@@ -54,7 +56,8 @@ begin
         wb_sel_out     <= 0;
 
         alu_sel_out    <= 0;
-
+        rs1_out <= 5'd0;
+        rs2_out <= 5'd0;
     end
     else begin
 
@@ -72,7 +75,8 @@ begin
         wb_sel_out     <= wb_sel_in;
 
         alu_sel_out    <= alu_sel_in;
-
+        rs1_out <= rs1_in;
+        rs2_out <= rs2_in;
     end
 end
 

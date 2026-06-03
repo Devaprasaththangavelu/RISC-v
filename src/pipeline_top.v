@@ -86,7 +86,59 @@ wire branch;
 
 wire [1:0] ALUOp;
 wire [3:0] alu_sel;
+wire [4:0] id_ex_rs1;
+wire [4:0] id_ex_rs2;
+///////////////////////////////////////////////////////////
+// FORWARDING WIRES
+///////////////////////////////////////////////////////////
 
+wire [1:0] forward_a;
+wire [1:0] forward_b;
+
+wire [31:0] forwarded_rs1;
+wire [31:0] forwarded_rs2;
+
+forwarding_unit u_forwarding (
+
+    .ex_mem_reg_write(ex_mem_reg_write),
+    .mem_wb_reg_write(mem_wb_reg_write),
+
+    .ex_mem_rd(ex_mem_rd),
+    .mem_wb_rd(mem_wb_rd),
+
+    .id_ex_rs1(id_ex_rs1),
+    .id_ex_rs2(id_ex_rs2),
+
+    .forward_a(forward_a),
+    .forward_b(forward_b)
+
+);
+forwarding_mux u_forward_mux_a (
+
+    .rs(id_ex_rs1_data),
+
+    .ex_out(ex_mem_alu_result),
+
+    .wb_out(wb_data),
+
+    .sel(forward_a),
+
+    .operand(forwarded_rs1)
+
+);
+forwarding_mux u_forward_mux_b (
+
+    .rs(id_ex_rs2_data),
+
+    .ex_out(ex_mem_alu_result),
+
+    .wb_out(wb_data),
+
+    .sel(forward_b),
+
+    .operand(forwarded_rs2)
+
+);
 ///////////////////////////////////////////////////////////
 // CONTROL UNIT
 ///////////////////////////////////////////////////////////
@@ -186,6 +238,10 @@ id_ex_reg u_id_ex (
     .rs1_data_in(rs1_data),
     .rs2_data_in(rs2_data),
 
+   
+    .rs1_in(rs1),
+    .rs2_in(rs2),
+
     .imm_in(imm_out),
 
     .rd_in(rd),
@@ -203,6 +259,9 @@ id_ex_reg u_id_ex (
     .rs1_data_out(id_ex_rs1_data),
     .rs2_data_out(id_ex_rs2_data),
 
+    .rs1_out(id_ex_rs1),
+    .rs2_out(id_ex_rs2),
+
     .imm_out(id_ex_imm),
 
     .rd_out(id_ex_rd),
@@ -216,7 +275,6 @@ id_ex_reg u_id_ex (
     .alu_sel_out(id_ex_alu_sel)
 
 );
-
 ///////////////////////////////////////////////////////////
 // EXECUTE STAGE
 ///////////////////////////////////////////////////////////
@@ -227,7 +285,7 @@ wire zero;
 
 alu_mux u_alu_mux (
 
-    .rs2(id_ex_rs2_data),
+    .rs2(forwarded_rs2),
     .imm(id_ex_imm),
 
     .alu_src(id_ex_alu_src),
@@ -238,7 +296,7 @@ alu_mux u_alu_mux (
 
 alu u_alu (
 
-    .a(id_ex_rs1_data),
+    .a(forwarded_rs1),
     .b(alu_b),
 
     .sel(id_ex_alu_sel),
