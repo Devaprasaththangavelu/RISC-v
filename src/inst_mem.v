@@ -14,7 +14,7 @@ module inst_mem (
     // BOOTLOADER STYLE INIT
     // =========================
     initial begin
-        $readmemh("program.hex", inst_memory);
+        $readmemh("program_1.hex", inst_memory);
     end
 
     // =========================

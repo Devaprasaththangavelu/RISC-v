@@ -28,23 +28,22 @@ reg [31:0] regs [0:31];
 // ======================================================
 
 initial begin
-
-    regs[0] = 32'd0;
-    regs[1] = 32'd20;
-    regs[2] = 32'd10;
-
+    integer i;
+    for(i = 0; i < 32; i = i + 1)
+        regs[i] = 32'd0;
 end
-
 
 // ======================================================
 // ASYNCHRONOUS READ
 // ======================================================
 
-assign rd1 = regs[rs1];
+//assign rd1 = regs[rs1];
 
-assign rd2 = regs[rs2];
+//assign rd2 = regs[rs2];
 
-
+// ASYNCHRONOUS READ WITH WRITE-THROUGH
+assign rd1 = (we && rd == rs1 && rd != 0) ? wd : regs[rs1];
+assign rd2 = (we && rd == rs2 && rd != 0) ? wd : regs[rs2];
 // ======================================================
 // SYNCHRONOUS WRITE
 // ======================================================

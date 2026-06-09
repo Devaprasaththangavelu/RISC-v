@@ -112,91 +112,48 @@ begin
 end
 
 endtask
-initial begin
-    $readmemh("program.hex", dut.u_imem.inst_memory);
 
-    $display("INST0 = %h", dut.u_imem.inst_memory[0]);
-    $display("INST1 = %h", dut.u_imem.inst_memory[1]);
-    $display("INST2 = %h", dut.u_imem.inst_memory[2]);
-    $display("INST3 = %h", dut.u_imem.inst_memory[3]);
-    $display("INST4 = %h", dut.u_imem.inst_memory[4]);
-end
+
 ///////////////////////////////////////////////////////////
 // MAIN CHECK
 ///////////////////////////////////////////////////////////
+
 ///////////////////////////////////////////////////////////
-// SW DEBUG MONITOR
+// SELF CHECKING
 ///////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////
-// DEBUG MONITOR
-///////////////////////////////////////////////////////////
-initial begin
-$monitor("%0t | ifw=%b | idexrd=%0d | exrd=%0d | bt=%b | fl=%b | instr=%h",
-    $time,
-    dut.if_id_write,
-    dut.id_ex_rd,
-    dut.ex_mem_rd,
-    dut.branch_taken,
-    dut.flush,
-    dut.if_id_instr);
-end
+
 initial begin
 
-   
-    #400;
+    ///////////////////////////////////////////////////////
+    // WAIT FOR EXECUTION
+    ///////////////////////////////////////////////////////
 
-    $display("\n==================================================");
-    $display("     FULL CPU VALIDATION RESULTS");
+    #100;
+
+    $display("\n");
+    $display("==================================================");
+    $display("       FORWARDING DEBUG TEST RESULTS");
     $display("==================================================");
 
     ///////////////////////////////////////////////////////
-    $display(" BASIC CHECK ==========================");
+    // CHECK RESULTS
     ///////////////////////////////////////////////////////
 
- // BASIC
-    check_reg(1,  5);
-    check_reg(2,  10);
-    
-    // DEPENDENCY CHAIN
-    check_reg(3,  15);   // add x1+x2
-    check_reg(4,  20);   // add x1+x3
-    check_reg(5,  35);   // add x4+x3
-    check_reg(6,  30);   // sub x5-x1
-    
-    // ALU OPS
-    check_reg(7,  0);    // and x1&x2 = 5&10 = 0
-    check_reg(8,  15);   // or  x1|x2 = 5|10 = 15
-    check_reg(9,  15);   // xor x1^x2 = 5^10 = 15
-    
-    // MEMORY
-    check_reg(10, 15);   // lw from mem[0]=15
-    
-    // LOAD-USE FORWARDING
-    check_reg(11, 20);   // add x10+x1 = 15+5
-    
-    // BRANCH - not taken
-    check_reg(12, 111);  // addi 111 executes
-    
-    // BRANCH - taken, x13 skipped
-    check_reg(13, 222);    // addi x13=222 skipped, x13 never written = 0
-    
-    // POST BRANCH
-    check_reg(14, 99);   // addi 99
-    check_reg(15, 104);  // add x14+x1
-    check_reg(16, 114);  // add x15+x2
-    check_reg(17, 129);  // add x16+x3
-    
-  
-    $display("==================================================");
-    $display(" SIMULATION COMPLETE");
-    $display("==================================================");
+    check_reg(1, 5);
+    check_reg(2, 10);
+    check_reg(3, 15);
+    check_reg(4, 20);
+    check_reg(6, 35);
 
+    ///////////////////////////////////////////////////////
+    // FINAL RESULT
+    ///////////////////////////////////////////////////////
 
     $display("==================================================");
 
     if(errors == 0)
 
-        $display("ALL CPU VALIDATION TESTS PASSED");
+        $display("FORWARDING VERIFIED SUCCESSFULLY");
 
     else
 
@@ -209,5 +166,41 @@ initial begin
     $finish;
 
 end
+///////////////////////////////////////////////////////////
+// DEBUG MONITOR
+///////////////////////////////////////////////////////////
+
+always @(posedge clk) begin
+
+    $display("\n------------------------------------------------");
+
+    $display("TIME=%0t", $time);
+
+    $display("PC=%h", dut.pc);
+
+    $display("IF_ID_INSTR=%h", dut.if_id_instr);
+
+    $display("ID_EX_RD=%0d", dut.id_ex_rd);
+
+    $display("ID_EX_RS1=%0d", dut.id_ex_rs1);
+    $display("ID_EX_RS2=%0d", dut.id_ex_rs2);
+
+    $display("ID_EX_RS1_DATA=%0d", dut.id_ex_rs1_data);
+    $display("ID_EX_RS2_DATA=%0d", dut.id_ex_rs2_data);
+
+    $display("FORWARD_A=%b", dut.forward_a);
+    $display("FORWARD_B=%b", dut.forward_b);
+
+    $display("FORWARDED_RS1=%0d", dut.forwarded_rs1);
+    $display("FORWARDED_RS2=%0d", dut.forwarded_rs2);
+
+    $display("ALU_RESULT=%0d", dut.alu_result);
+
+    $display("EX_MEM_RD=%0d", dut.ex_mem_rd);
+    $display("MEM_WB_RD=%0d", dut.mem_wb_rd);
+
+end
+
+
 
 endmodule

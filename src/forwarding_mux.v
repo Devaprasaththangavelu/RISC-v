@@ -15,17 +15,11 @@ always @(*) begin
 
     case(sel)
 
-        2'b00:
-            operand = rs;
-
-        2'b10:
-            operand = ex_out;
-
-        2'b01:
-            operand = wb_out;
-
-        default:
-            operand = rs;
+        2'b00:operand = rs;
+        2'b10:operand = ex_out;
+        2'b01:operand = wb_out; 
+        default:operand = rs;
+            
 
     endcase
 
